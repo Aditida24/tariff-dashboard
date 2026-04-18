@@ -757,24 +757,26 @@ def display_recommendation_tab(filtered_profiles: pd.DataFrame):
 st.title("⚡ Tariff Intelligence Dashboard")
 st.caption("Business-style dashboard for household tariff comparison, market benchmarking, and switching insights.")
 
+DEFAULT_WORKBOOK = "Dataset _Dashboard.xlsx"
+
 with st.sidebar:
-    st.markdown("### Upload workbook")
+    st.markdown("### Data source")
     uploaded_file = st.file_uploader(
-        "Upload the Excel file",
+        "Upload a replacement Excel file",
         type=["xlsx"],
-        help="The workbook must contain All_Profile_Summary, Profile_Overview, DAM, and Settlement sheets.",
+        help="If no file is uploaded, the app uses the bundled workbook from the repository.",
     )
 
-if uploaded_file is None:
-    st.info("Upload your workbook to generate the dashboard.")
-    st.stop()
-
 try:
-    data = load_workbook(uploaded_file)
+    if uploaded_file is not None:
+        data = load_workbook(uploaded_file)
+        st.sidebar.success("Using uploaded workbook")
+    else:
+        data = load_workbook(DEFAULT_WORKBOOK)
+        st.sidebar.success(f"Using bundled workbook: {DEFAULT_WORKBOOK}")
 except Exception as e:
     st.error(f"Could not read the workbook: {e}")
     st.stop()
-
 profile_insights = data["profile_insights"]
 filtered_profiles, active_filters = add_sidebar_filters(profile_insights)
 filtered_profile_names = filtered_profiles["profile_name"].unique().tolist()
